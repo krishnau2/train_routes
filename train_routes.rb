@@ -22,13 +22,15 @@ class TrainRoutes
     total_distance
   end
   
-  def number_of_trips(start, finish, max_stops, args={stops: 0})
+  def number_of_trips(start, finish, options, args={stops: 0, distance: 0})
 
-    @trips_count += 1 if start == finish && args[:stops] > 0
+    distance_below_max_distance = options[:max_distance] ? (args[:distance] < options[:max_distance]) : true
 
-    unless args[:stops] == max_stops
+    @trips_count += 1 if start == finish && args[:stops] >= options[:min_stops] && distance_below_max_distance
+
+    if distance_below_max_distance && args[:stops] <= options[:max_stops]
       @graph[start].each do |node, distance|        
-        number_of_trips(node, finish, max_stops, {stops: args[:stops] + 1})
+        number_of_trips(node, finish, options, {stops: args[:stops] + 1, distance: args[:distance] + distance})
       end
     end
     @trips_count
@@ -45,6 +47,14 @@ puts "3. Distance of the rute A-B-C: #{train_route.distance('A-D-C')}"
 puts "4. Distance of the rute A-B-C: #{train_route.distance('A-E-B-C-D')}"
 puts "5. Distance of the rute A-B-C: #{train_route.distance('A-E-D')}"
 
-result_6 = TrainRoutes.new().number_of_trips('C', 'C', 3)
-puts "6. Number of Trips starting and eding at C, maximum 3 stops: #{result_6}"
+options = {min_stops: 1, max_stops: 3}
+result_6 = TrainRoutes.new().number_of_trips('C', 'C', options)
+puts "6. Number of Trips from C to C, with maximum 3 stops: #{result_6}"
+options = {min_stops: 4, max_stops: 4}
+result_7 = TrainRoutes.new().number_of_trips('A', 'C', options)
+puts "7. Number of Trips from A to C, with exactly 4 stops: #{result_7}"
+
+options = {min_stops: 1, max_stops: 10, max_distance: 30}
+result_10 = TrainRoutes.new().number_of_trips('C', 'C', options)
+puts "10. Number of Trips from C to C, with distance < 30: #{result_10}"
 
