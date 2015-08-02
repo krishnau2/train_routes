@@ -22,6 +22,17 @@ class TrainRoutes
     total_distance
   end
   
+  def number_of_trips(start, finish, max_stops, args={stops: 0})
+
+    @trips_count += 1 if start == finish && args[:stops] > 0
+
+    unless args[:stops] == max_stops
+      @graph[start].each do |node, distance|        
+        number_of_trips(node, finish, max_stops, {stops: args[:stops] + 1})
+      end
+    end
+    @trips_count
+  end
   
 end
 
@@ -34,4 +45,6 @@ puts "3. Distance of the rute A-B-C: #{train_route.distance('A-D-C')}"
 puts "4. Distance of the rute A-B-C: #{train_route.distance('A-E-B-C-D')}"
 puts "5. Distance of the rute A-B-C: #{train_route.distance('A-E-D')}"
 
+result_6 = TrainRoutes.new().number_of_trips('C', 'C', 3)
+puts "6. Number of Trips starting and eding at C, maximum 3 stops: #{result_6}"
 
